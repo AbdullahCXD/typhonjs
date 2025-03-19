@@ -1,4 +1,10 @@
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a5d270ab-cc8d-4549-ba73-7c07934e0269" width="256" height="256" />
+</p>
+
 <h1 align="center">Typhonjs</h1>
+
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/Typhonjs" alt="npm version">
