@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Get version
         id: version
         uses: actions/github-script@v7
@@ -18,6 +19,11 @@ jobs:
           script: |
             const package = require('./package.json');
             return package.version;
+
+      - name: Version Check
+        uses: EndBug/version-check@v2.1.5
+        with:
+            diff-search: true
       
       - name: Send Discord Notification
         env:
