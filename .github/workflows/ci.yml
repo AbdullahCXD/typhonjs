@@ -12,11 +12,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
 
-      - name: Set up pnpm
-        run: npm i --location=global pnpm
-
       - name: Install
-        run: pnpm install
+        run: npm install
 
       - name: Build
-        run: pnpm build
+        run: npm run build
