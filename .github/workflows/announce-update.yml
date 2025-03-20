@@ -1,6 +1,8 @@
 name: Announce Update
 on:
+    
   workflow_run:
+    branches: [development, master]
     workflows: ['Publish', 'Publish Development']
     types: [completed]
 
