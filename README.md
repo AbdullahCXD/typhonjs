@@ -35,7 +35,7 @@ npm install --location=global typhonjs
 
 ### Initialize Your Project
 
-Once Typhonjs is installed, create a new project with:
+Once Typhonjs is installed, create a new project with: 
 
 ```bash
 typhon init
