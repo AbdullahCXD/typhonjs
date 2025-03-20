@@ -12,6 +12,9 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
 
+      - name: List Current Directory (DEBUGGING)
+        run: ls && ls ..
+
       - name: Install
         run: npm install
 
