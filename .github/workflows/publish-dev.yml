@@ -1,8 +1,8 @@
-name: Publish
+name: Publish Development
 on:
     push:
         branches:
-            - master
+            - development
 jobs:
     npm-publish:
         name: npm-publish
@@ -34,6 +34,6 @@ jobs:
               if: steps.check.outputs.changed == 'true'
               # We need --no-git-checks because we swap a boolean to allow more lax types
               # in the published package.
-              run: pnpm publish --no-git-checks
+              run: pnpm publish --tag dev --no-git-checks
               env:
                 npm_config_//registry.npmjs.org/:_authToken: ${{ secrets.NPM_AUTH_TOKEN }}
