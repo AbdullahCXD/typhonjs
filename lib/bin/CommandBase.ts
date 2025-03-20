@@ -2,7 +2,8 @@ import { Command, program } from "commander";
 import { Awaitable } from "../types";
 import { TyphonLogger } from "../TyphonLogger";
 
-export abstract class CommandBase {
+export type SectionType = "typh" | "typhon";
+export abstract class CommandBase<Section extends SectionType = "typhon"> {
 
     private command!: Command;
     private logger: TyphonLogger;
@@ -15,8 +16,8 @@ export abstract class CommandBase {
         return this.logger;
     }
 
-    getSection(): "typh" | "typhon" {
-        return "typhon";
+    getSection(): Section {
+        return "typhon" as Section;
     }
 
     register() {
@@ -39,6 +40,14 @@ export abstract class CommandBase {
 
     getCommand(): Command {
         return this.command
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    getDescription() {
+        return this.description;
     }
 
     abstract execute(...args: any[]): Awaitable<void>;

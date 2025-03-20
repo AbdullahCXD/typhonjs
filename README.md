@@ -101,7 +101,7 @@ module.exports = {
 
 ## License
 
-Typhonjs is open-source and available under the [MIT License](LICENSE).
+Typhonjs is open-source and available under the [MIT License](https://github.com/AbdullahCXD/typhonjs/blob/master/LICENSE).
 
 ---
 

@@ -1,16 +1,25 @@
 import { Command } from "commander";
 import { TyphRunner } from "../../runner/TyphRunner";
 import { TyphonFile } from "../../types";
-import { CommandBase } from "../CommandBase";
+import { CommandBase, SectionType } from "../CommandBase";
 import { inspect } from "fs-jetpack"
+import { CancellableEvent } from "../../events/Events";
+import { TyphonPluginManager } from "../../plugin/TyphonPluginManager";
 
-export class RunCommand extends CommandBase {
+export interface RunEventContext extends CancellableEvent {
+
+    performance: boolean;
+    file: string;
+
+}
+
+export class RunCommand extends CommandBase<SectionType> {
 
     constructor() {
         super("run <file>", "Loads and runs a typh file");
     }
 
-    getSection(): "typh" | "typhon" {
+    getSection(): SectionType {
         return "typh";
     }
 
@@ -24,6 +33,15 @@ export class RunCommand extends CommandBase {
         if (inspect(file)?.type == "dir") return this.getLogger().error("Unable to load typh file, cannot be directory.");
 
         const runner = new TyphRunner();
+        const runnerContext: RunEventContext = {
+            file: file,
+            performance: options?.performance ?? false,
+            canceled: false
+        }
+
+        const canceled = TyphonPluginManager.getInstance().processEvent("run", runnerContext);
+
+        if (canceled) return;
 
         const old = performance.now();
 
@@ -37,10 +55,14 @@ export class RunCommand extends CommandBase {
 
         if (options?.performance) {
 
+            const performanceResult = {
+                file: file,
+                time: `${(current - old) / 1000}s`,
+            }
+
             console.log("");
-            this.getLogger().startSection("Performance Metrics");
-            this.getLogger().info("Time: " + ((current / old) * 1000) + "s");
-            this.getLogger().endSection("Performance Metrics", true);
+            this.getLogger().header("Performance Metrics Table:");
+            this.getLogger().table(performanceResult);
             console.log("");
 
         }
