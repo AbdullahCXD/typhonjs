@@ -11,6 +11,8 @@ export type Awaitable<T> = T | Promise<T>;
 export type TyphonFile = `${string}.js` | `${string}.ts`;
 export type PackageManager = "pnpm" | "npm" | "yarn";
 
+export const TyphonBuildFile = `typhbuild.config.json`;
+
 export interface TyphonConfig {
 
     buildinfo: {

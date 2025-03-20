@@ -2,10 +2,10 @@ import { Listr } from "listr2";
 import { Project } from "../../project";
 import { PackageManager } from "../../types";
 import { CommandBase } from "../CommandBase";
-import { ChildProcess, exec } from "child_process";
 import * as chalk from "ansi-colors";
 import fs from "fs";
 import { gracefulify } from "graceful-fs";
+import { execShellCommand } from "../../utility";
 gracefulify(fs);
 
 function getPackageVersion(pkgName: string) {
@@ -51,11 +51,7 @@ export class InstallCommand extends CommandBase {
                 title: `📦 Installing ${chalk.cyan(packages.length.toString())} package(s)...`,
                 task: async (ctx, task) => {
                     try {
-                        const result: ChildProcess = exec(`${ctx.executionCommand!} ${packages.join(" ")}`, { cwd: process.cwd(), env: process.env });
-
-                        result.on("error", (error) => {
-                            throw new Error(`🚨 Installation error: ${chalk.red((error as Error).message)}`)
-                        });
+                        await execShellCommand(`${ctx.executionCommand!} ${packages.join(" ")}`, { cwd: process.cwd(), env: process.env })
 
                         task.title = `✅ Successfully installed ${chalk.green(packages.length.toString())} package(s)`;
                     } catch (error) {

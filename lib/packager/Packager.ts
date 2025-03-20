@@ -6,7 +6,7 @@ import jetpack from "fs-jetpack";
 import chalk from "ansi-colors";
 import prettyBytes from "bytes";
 import { Project } from "../project";
-import { PackagerOptions } from "../types";
+import { PackageManager, PackagerOptions, TyphonBuildFile } from "../types";
 import { TyphonLogger } from "../TyphonLogger";
 import { isDirectory } from "../utility";
 
@@ -90,14 +90,23 @@ export class Packager {
                 this.logger.completeTask("resources");
                 this.logger.success(`Resource files packaged`);
             }
+            
+            let oldMain = (this.project.getConfig().get("build.main")! as string);
+            const p = path.parse(oldMain);
+            // Only replace dots with path separators in the directory part
+            const dirPath = p.dir.replaceAll(".", path.sep);
+            // Combine the transformed directory path with the original filename including extension
+            oldMain = path.join(dirPath, p.base);
 
             const buildBuffer = Buffer.from(JSON.stringify({
                 name: this.project.name,
                 version: this.project.version,
-                main: this.project.getConfig().get("build.main")!
-            }));
+                main: oldMain,
+                pm: this.project.getConfig().get("buildinfo.packageManager")! as PackageManager,
+                deps: this.project.getConfig().get("dependencies")! as Record<string, string>
+            }, null, 4));
 
-            this.zip.addFile("typhbuild.config.json", buildBuffer);
+            this.zip.addFile(TyphonBuildFile, buildBuffer);
             
             this.logger.endSection("Packaging complete");
             

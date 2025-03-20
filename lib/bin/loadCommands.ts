@@ -4,6 +4,8 @@ import { InitCommand } from "./commands/init";
 import { BuildCommand } from "./commands/build";
 import { InstallCommand } from "./commands/install";
 import { UpdateCommand } from "./commands/update";
+import { RunCommand } from "./commands/run";
+import { SettingStore } from "../settings/SettingStore";
 
 export default function loadCommands(section: "typh" | "typhon"): Command {
     const commands: CommandBase[] = [
@@ -11,7 +13,10 @@ export default function loadCommands(section: "typh" | "typhon"): Command {
         new BuildCommand(),
         new InstallCommand(),
         new UpdateCommand(),
+        new RunCommand(),
     ];
+
+    SettingStore.getInstance().ensure();
 
     for (const command of commands) {
         if (command.getSection() === section) {
