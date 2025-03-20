@@ -4,19 +4,24 @@ on:
   push:
     branches:
       - master
+      - development
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # How can someone forget this?
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
 
-      - name: List Current Directory (DEBUGGING)
-        run: ls && ls ..
+      - name: Set up pnpm
+        run: npm i --location=global pnpm
 
       - name: Install
-        run: npm install
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm build
