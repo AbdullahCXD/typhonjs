@@ -40,8 +40,8 @@ jobs:
             - name: Generate Release
               if: steps.check.outputs.changed == 'true'
               run: |
-                  git config user.email "typedoc@gerritbirkeland.com"
-                  git config user.name "TypeDoc Bot"
+                  git config user.email "send@abdullahcxd.is-a.dev"
+                  git config user.name "AbdcxdOnline"
                   node scripts/create_release.js
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
