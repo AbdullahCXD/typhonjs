@@ -27,9 +27,6 @@ jobs:
             - name: Install
               if: steps.check.outputs.changed == 'true'
               run: pnpm install
-            - name: Build
-              if: steps.check.outputs.changed == 'true'
-              run: pnpm prepare
             - name: Publish
               if: steps.check.outputs.changed == 'true'
               # We need --no-git-checks because we swap a boolean to allow more lax types

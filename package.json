@@ -1,6 +1,6 @@
 {
   "name": "typhonjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Maven/Gradle inspired build system/project manager for Node.js",
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -15,6 +15,7 @@
   },
   "keywords": [],
   "author": "AbdullahCXD",
+  "maintainers": ["AbdullahCXD", "abdcxdonline"],
   "license": "ISC",
   "packageManager": "pnpm@10.6.4",
   "dependencies": {
