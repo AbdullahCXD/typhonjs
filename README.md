@@ -7,7 +7,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/npm/v/Typhonjs" alt="npm version">
+  <img src="https://img.shields.io/npm/v/typhonjs" alt="npm version">
   <img src="https://img.shields.io/github/languages/code-size/abdullahcxd/Typhonjs" alt="code size">
   <img src="https://img.shields.io/github/license/abdullahcxd/Typhonjs" alt="license">
 </p>
