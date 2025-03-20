@@ -1,6 +1,6 @@
 {
   "name": "typhonjs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Maven/Gradle inspired build system/project manager for Node.js",
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -9,8 +9,8 @@
     "typhon": "dist/bin/typhon.js"
   },
   "scripts": {
-    "prepare": "pnpm tsc",
-    "test": "pnpm prepare && pnpm tsx test/index.ts",
+    "build": "pnpm tsc",
+    "test": "pnpm build && pnpm tsx test/index.ts",
     "prepare:link": "pnpm build && pnpm link"
   },
   "keywords": [],
