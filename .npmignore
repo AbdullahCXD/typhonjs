@@ -3,3 +3,4 @@ lib
 test
 .vscode
 pnpm-workspace.yaml
+.github
