@@ -7,9 +7,10 @@ import path from "path";
 import { JavaScriptConfiguration } from "../config/JavaScriptConfiguration";
 import { ProjectConfigLoader } from "./ProjectConfigLoader";
 import { Packager } from "../packager";
-import { PackagerOptions } from "../types";
+import { AskInformation, PackagerOptions } from "../types";
 import { LogLevel, TyphonLogger } from "../TyphonLogger";
 import { spawnSync } from "child_process";
+import { PluginProduct } from "./products/PluginProduct";
 graceful.gracefulify(fs);
 
 export class Project {
@@ -38,12 +39,14 @@ export class Project {
 
     setCustomDefinedConfig(config: JavaScriptConfiguration) {
         this.projectConfig = config;
-        this.name = config.get("buildinfo.name");
-        this.version = config.get("buildinfo.version");
+        this.name = config.get<string>("buildinfo.name")!;
+        this.version = config.get<string>("buildinfo.version")!;
     }
 
-    initProduct() {
+    async initProduct(info: AskInformation) {
 
+        this.projectConfig.setInitial();
+        this.projectConfig.reload();
         const directories = this.productInitializor.getInitialDirectories();
         const files = this.productInitializor.getInitialFiles();
 
@@ -56,8 +59,10 @@ export class Project {
             this.logger.info("Creating -> " + file.name);
             jetpack.write(this.projectPath + "/" + file.name, file.content);
         }
-
+     
+        this.productInitializor.updateConfig(this.projectConfig);
         this.projectConfig.save();
+        await this.productInitializor.postInit(info);
     }
 
     initPackage() {

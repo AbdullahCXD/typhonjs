@@ -9,6 +9,7 @@ import { Project } from "../project";
 import { PackageManager, PackagerOptions, TyphonBuildFile } from "../types";
 import { TyphonLogger } from "../TyphonLogger";
 import { isDirectory } from "../utility";
+import { PackagePath } from "./PackagePath";
 
 gracefulFs.gracefulify(fs);
 
@@ -38,6 +39,8 @@ export class Packager {
 
     async package(): Promise<void> {
         try {
+            if (this.project.getConfig().getBoolean("buildinfo.plugin", false)) return this.logger.error("Plugin building is restricted! You cannot package/build a plugin project.");
+
             // Start the build process
             this.logger.startBuild();
             
@@ -91,12 +94,8 @@ export class Packager {
                 this.logger.success(`Resource files packaged`);
             }
             
-            let oldMain = (this.project.getConfig().get("build.main")! as string);
-            const p = path.parse(oldMain);
-            // Only replace dots with path separators in the directory part
-            const dirPath = p.dir.replaceAll(".", path.sep);
-            // Combine the transformed directory path with the original filename including extension
-            oldMain = path.join(dirPath, p.base);
+            let oldMain = PackagePath.replace(this.project.getConfig().getString("build.main")!);
+            
 
             const buildBuffer = Buffer.from(JSON.stringify({
                 name: this.project.name,

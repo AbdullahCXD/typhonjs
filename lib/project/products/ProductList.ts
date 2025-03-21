@@ -2,6 +2,7 @@ import { Project } from "../Project";
 import { EmptyProduct } from "./EmptyProduct";
 import { ExampleProduct } from "./ExampleProduct";
 import { IProductInitializor } from "./IProductInitializor";
+import { PluginProduct } from "./PluginProduct";
 
 export class ProductList {
 
@@ -9,7 +10,8 @@ export class ProductList {
 
     static {
         this.registerProduct("empty", new EmptyProduct());
-        this.registerProduct("example", new ExampleProduct())
+        this.registerProduct("example", new ExampleProduct());
+        this.registerProduct("plugin", new PluginProduct());
     }
 
     public static registerProduct(name: string, product: IProductInitializor) {

@@ -23,7 +23,7 @@ export class TyphonPluginManager {
     registerPlugins(projectDirectory: string) {
 
         const config = new JavaScriptConfiguration(path(projectDirectory, "plugins.typh.json"), { plugins: [] });
-        if (!config.exists()) return;
+        if (!config.exists()) return this;
         const plugins = config.get("plugins") as TyphonPlugin[];
 
         if (plugins && ArrayUtils.isNotEmpty(plugins)) {
@@ -35,7 +35,20 @@ export class TyphonPluginManager {
         return this;
     }
 
+    async test(plugin: TyphonPlugin): Promise<[boolean, Error | undefined]> {
+        try {
+            await plugin.load();
+
+            // test out push event
+            this.processPluginEvent(plugin, "test");
+            return [true, undefined];
+        } catch (err) {
+            return [false, err as Error];
+        }
+    }
+
     registerPlugin(plugin: TyphonPlugin) {
+        plugin.load();
         this.plugins.set(plugin.getPluginInformation().name, plugin);
         return this;
     }
@@ -48,13 +61,18 @@ export class TyphonPluginManager {
      */
     processEvent<T extends keyof TyphonEvents>(key: T, ...args: TyphonEvents[T]): boolean {
         for (const [_, plugin] of this.plugins) {
-            const result = plugin.onEvent(key, ...args);
-            const cancelledEvents = ArrayUtils.filter(result as CancellableEvent[], (v) => v.canceled == true);
-            if (ArrayUtils.isNotEmpty(cancelledEvents)) {
-                return true;
-            }
+            return this.processPluginEvent(plugin, key, ...args);
         }
 
+        return false;
+    }
+
+    processPluginEvent<T extends keyof TyphonEvents>(plugin: TyphonPlugin, key: T, ...args: TyphonEvents[T]): boolean {
+        const result = plugin.onEvent(key, ...args);
+        const cancelledEvents = ArrayUtils.filter(result as CancellableEvent[], (v) => v.canceled == true);
+        if (ArrayUtils.isNotEmpty(cancelledEvents)) {
+            return true;
+        }
         return false;
     }
 }

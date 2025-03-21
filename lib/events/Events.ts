@@ -5,6 +5,7 @@ export interface TyphonEvents {
 
     build: [ctx: BuildEventContext];
     run: [ctx: RunEventContext];
+    test: [];
 
 }
 

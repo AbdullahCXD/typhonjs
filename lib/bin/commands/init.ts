@@ -1,6 +1,6 @@
 import { withTyphon } from "../..";
-import { Project } from "../../project";
-import { TyphonConfig } from "../../types";
+import { IProductInitializor, Project } from "../../project";
+import { AskInformation, TyphonConfig } from "../../types";
 import { CommandBase } from "../CommandBase";
 import { Listr } from "listr2";
 import enquirer from "enquirer";
@@ -13,14 +13,20 @@ export interface InitContext {
     project?: Project;
 }
 
+
+
 export class InitCommand extends CommandBase {
     constructor() {
         super("init [product]", "Initialize a new Typhon project");
     }
 
     async execute(product?: string): Promise<void> {
-        
-        const { name, version } = await this.askInfo();
+        const project = new Project(process.cwd());
+        if (product && ProductList.hasProduct(product)) {
+            ProductList.updateProduct(project, product);
+        }
+
+        const { name, version, ...others } = await this.askInfo(project.productInitializor);
 
         const listr = new Listr<InitContext>([
             {
@@ -31,14 +37,13 @@ export class InitCommand extends CommandBase {
             },
             {
                 title: "Create the project",
-                task: (ctx) => {
-                    const project = new Project(process.cwd());
-                    if (product && ProductList.hasProduct(product)) {
-                        ProductList.updateProduct(project, product);
-                    }
-
-                    project.initProduct();
+                task: async (ctx) => {
                     project.initPackage();
+                    await project.initProduct({
+                        name: name,
+                        version: version,
+                        ...others
+                    } as AskInformation);
                     ctx.project = project;
                 }
             },
@@ -55,8 +60,8 @@ export class InitCommand extends CommandBase {
         
     }
 
-    async askInfo(): Promise<{ name: string, version: string }> {
-        const { name, version }: { name: string, version: string } = await enquirer.prompt([
+    async askInfo(product: IProductInitializor): Promise<{ name: string, version: string }> {
+        const { name, version, ...others }: AskInformation = await enquirer.prompt([
             {
                 type: "input",
                 name: "name",
@@ -71,10 +76,11 @@ export class InitCommand extends CommandBase {
                     return semver.valid(value) ? true : "Invalid version format";
                 },
                 message: "Enter the version of the project"
-            }
+            },
+            ...(product.addPromptOptions() as any)
         ]);
 
-        return { name, version };
+        return { name, version, ...others };
     }
 
     
@@ -84,6 +90,7 @@ export class InitCommand extends CommandBase {
                 name: name,
                 version: version,
                 packageManager: "npm",
+                plugin: false,
             },
 
             build: {

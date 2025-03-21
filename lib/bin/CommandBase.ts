@@ -2,13 +2,17 @@ import { Command, program } from "commander";
 import { Awaitable } from "../types";
 import { TyphonLogger } from "../TyphonLogger";
 
-export type SectionType = "typh" | "typhon";
-export abstract class CommandBase<Section extends SectionType = "typhon"> {
+export type SectionType = "typh" | "typhon" | "both";
+export interface CommandOptions {
+    subcommands?: boolean
+}
+
+export abstract class CommandBase<Section extends SectionType = SectionType> {
 
     private command!: Command;
     private logger: TyphonLogger;
 
-    constructor(private name: string, private description: string) {
+    constructor(private name: string, private description: string, private options?: CommandOptions) {
         this.logger = TyphonLogger.getInstance(`:${name}`);
     }
 
@@ -23,14 +27,18 @@ export abstract class CommandBase<Section extends SectionType = "typhon"> {
     register() {
         this.command = program
             .command(this.name)
-            .description(this.description)
-            .action(async (...args: any[]) => {
+            .description(this.description);
+        
+        if (!this.options?.subcommands) {
+            this.command = this.command.action(async (...args: any[]) => {
                 try {
                     await this.execute(...args);
                 } catch (err) {
                     throw err;
                 }
             });
+        }
+
         return this.setupCommand();
     }
 

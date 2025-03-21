@@ -25,7 +25,7 @@ export class InstallCommand extends CommandBase {
 
     async execute(packages: string[]): Promise<void> {
         const project = new Project(process.cwd());
-        const pm = project.getConfig().get("buildinfo.packageManager") ?? "npm";
+        const pm = project.getConfig().get<string>("buildinfo.packageManager") ?? "npm";
 
         const listr = new Listr<InstallContext>([
             {
@@ -62,7 +62,7 @@ export class InstallCommand extends CommandBase {
             {
                 title: `⚙️ Configuring Typhon...`,
                 task: async (ctx, task) => {
-                    let lastDependencyRecord = project.getConfig().get("dependencies") || {};
+                    let lastDependencyRecord = project.getConfig().get<Record<string, string>>("dependencies") || {};
                     for (const pkg of packages) {
                         const version = getPackageVersion(pkg);
                         lastDependencyRecord[pkg] = `${version}`;

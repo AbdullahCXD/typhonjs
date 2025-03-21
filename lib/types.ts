@@ -12,6 +12,7 @@ export type TyphonFile = `${string}.js` | `${string}.ts`;
 export type PackageManager = "pnpm" | "npm" | "yarn";
 
 export const TyphonBuildFile = `typhbuild.config.json`;
+export type Newable<T> = new (...args: any[]) => T;
 
 export interface TyphonConfig {
 
@@ -19,6 +20,7 @@ export interface TyphonConfig {
         name: string;
         version: string;
         packageManager: PackageManager;
+        plugin?: boolean;
     },
 
     build: {
@@ -28,5 +30,10 @@ export interface TyphonConfig {
     dependencies: Record<string, string>;
 
 }
+
+export type AskInformation = {
+    name: string;
+    version: string;
+} & Record<string, any>
 
 export type TyphonZipName = `${string}.typh`;

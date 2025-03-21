@@ -5,16 +5,16 @@ const path = require('path');
  * ConfigManager class that handles reading and writing configurations
  * from/to a JavaScript configuration file
  */
-export class JavaScriptConfiguration<T extends any = any> {
+export class JavaScriptConfiguration {
 
   private configPath: string;
-  private config: Record<string, T>;
+  private config: Record<string, any>;
 
   /**
    * Creates a new ConfigManager instance
    * @param {string} configPath - Path to the configuration file (default: '.config.js')
    */
-  constructor(configPath = '.config.js', private defaults: Record<string, T> = {}) {
+  constructor(configPath = '.config.js', private defaults: Record<string, any> = {}) {
     this.configPath = path.resolve(process.cwd(), configPath);
     this.config = this.loadConfig();
   }
@@ -48,7 +48,7 @@ export class JavaScriptConfiguration<T extends any = any> {
    */
   has(key: string, defaultValue = undefined) {
     const keys = key.split('.');
-    let value: Record<string, T> = this.config;
+    let value: Record<string, any> = this.config;
     
     for (const k of keys) {
       if (value === undefined || value === null || typeof value !== 'object') {
@@ -61,23 +61,137 @@ export class JavaScriptConfiguration<T extends any = any> {
   }
 
   /**
-   * Gets a configuration value by key
+   * Gets a configuration value by key with generic type
    * @param {string} key - The configuration key
    * @param {T} defaultValue - Default value if key doesn't exist
-   * @returns {any} The configuration value or default value
+   * @returns {T} The configuration value or default value
    */
-  get(key: string, defaultValue = undefined): T | undefined {
+  get<T>(key: string, defaultValue?: T): T | undefined {
     const keys = key.split('.');
-    let value = this.config;
+    let value: any = this.config;
     
     for (const k of keys) {
       if (value === undefined || value === null || typeof value !== 'object') {
         return defaultValue;
       }
-      value = value[k] as any;
+      value = value[k];
     }
     
     return value !== undefined ? value as T : defaultValue;
+  }
+
+  /**
+   * Gets a boolean configuration value
+   * @param {string} key - The configuration key
+   * @param {boolean} defaultValue - Default value if key doesn't exist or is not a boolean
+   * @returns {boolean} The boolean value or default
+   */
+  getBoolean(key: string, defaultValue = false): boolean {
+    const value = this.get<any>(key);
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const lowercased = value.toLowerCase();
+      if (lowercased === 'true' || lowercased === '1' || lowercased === 'yes') {
+        return true;
+      }
+      if (lowercased === 'false' || lowercased === '0' || lowercased === 'no') {
+        return false;
+      }
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Gets a number configuration value
+   * @param {string} key - The configuration key
+   * @param {number} defaultValue - Default value if key doesn't exist or is not a number
+   * @returns {number} The number value or default
+   */
+  getNumber(key: string, defaultValue = 0): number {
+    const value = this.get<any>(key);
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+    if (typeof value === 'boolean') {
+      return value ? 1 : 0;
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Gets a string configuration value
+   * @param {string} key - The configuration key
+   * @param {string} defaultValue - Default value if key doesn't exist
+   * @returns {string} The string value or default
+   */
+  getString(key: string, defaultValue = ''): string {
+    const value = this.get<any>(key);
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return String(value);
+  }
+
+  /**
+   * Gets an array configuration value
+   * @param {string} key - The configuration key
+   * @param {Array<T>} defaultValue - Default value if key doesn't exist or is not an array
+   * @returns {Array<T>} The array value or default
+   */
+  getArray<T>(key: string, defaultValue: T[] = []): T[] {
+    const value = this.get<any>(key);
+    if (Array.isArray(value)) {
+      return value as T[];
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Gets an object configuration value
+   * @param {string} key - The configuration key
+   * @param {Record<string, T>} defaultValue - Default value if key doesn't exist or is not an object
+   * @returns {Record<string, T>} The object value or default
+   */
+  getObject<T>(key: string, defaultValue: Record<string, T> = {} as Record<string, T>): Record<string, T> {
+    const value = this.get<any>(key);
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, T>;
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Gets a date configuration value
+   * @param {string} key - The configuration key
+   * @param {Date} defaultValue - Default value if key doesn't exist or is not convertible to a date
+   * @returns {Date} The date value or default
+   */
+  getDate(key: string, defaultValue = new Date()): Date {
+    const value = this.get<any>(key);
+    if (value instanceof Date) {
+      return value;
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    return defaultValue;
   }
 
   /**
@@ -100,7 +214,7 @@ export class JavaScriptConfiguration<T extends any = any> {
     
     for (const k of keys) {
       if (current[k] === undefined || current[k] === null || typeof current[k] !== 'object') {
-        current[k] = {} as T;
+        current[k] = {};
       }
       current = current[k] as any;
     }

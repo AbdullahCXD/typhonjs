@@ -1,4 +1,6 @@
-import { IProductInitializor, ProductFile } from "./IProductInitializor";
+import { JavaScriptConfiguration } from "../../config";
+import { AskInformation } from "../../types";
+import { IProductInitializor, ProductFile, PromptOptions } from "./IProductInitializor";
 
 export class EmptyProduct implements IProductInitializor {
     getInitialDirectories(): string[] {
@@ -15,5 +17,17 @@ export class EmptyProduct implements IProductInitializor {
 
     getInitialFiles(): ProductFile[] {
         return [];
+    }
+
+    updateConfig(config: JavaScriptConfiguration): Record<string, any> {
+        return {}
+    }
+
+    addPromptOptions(): PromptOptions[] {
+        return [];
+    }
+
+    postInit(askInfo: AskInformation): void {
+        
     }
 }
