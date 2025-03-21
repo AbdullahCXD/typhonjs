@@ -81,18 +81,14 @@ In this example, we’ve defined two tasks: `build` and `test`. Each task has a 
 
 ## Plugins
 
-Typhonjs is **extensible**! You can add plugins to customize its functionality. Just add them to the `plugins` array in your config file:
+Typhonjs is **extensible**! You can add plugins to customize its functionality. Just add them to the `plugins` array in the `plugins.typh.js` file:
 
 This feature is still work in progress. Mainly this feature will adopt similar like idea of Gradle commands/plugins.
 
 ```js
 module.exports = {
   plugins: [
-    'plugin-name', 
-    {
-      name: 'plugin-name',
-      options: { /* Plugin options */ },
-    },
+    ExamplePlugin
   ],
 };
 ```

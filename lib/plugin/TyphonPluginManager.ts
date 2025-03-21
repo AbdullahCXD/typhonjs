@@ -4,6 +4,7 @@ import Collection from "../utils/Collection";
 import { TyphonPlugin } from "./TyphonPlugin";
 import { ArrayUtils } from "../utils/ArrayUtils";
 import { CancellableEvent, TyphonEvents } from "../events/Events";
+import { Newable } from "../types";
 
 export class TyphonPluginManager {
 
@@ -28,7 +29,15 @@ export class TyphonPluginManager {
 
         if (plugins && ArrayUtils.isNotEmpty(plugins)) {
             for (const plugin of plugins) {
-                this.registerPlugin(plugin);
+                let p: TyphonPlugin
+                if ('prototype' in plugin) {
+                    const unconstructedPlugin: Newable<TyphonPlugin> = plugin as unknown as Newable<TyphonPlugin>
+                    p = new unconstructedPlugin();
+                } else {
+                    p = plugin;
+                }
+                
+                this.registerPlugin(p);
             }
         }
 
