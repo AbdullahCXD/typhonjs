@@ -1,6 +1,7 @@
+import EventEmitter from "events";
 import { CommandBase } from "../bin/CommandBase";
 import { CommandRegistry } from "../commands/CommandRegistry";
-import { Events, TyphonEvents } from "../events/Events";
+import { TyphonEvents } from "../events/Events";
 import { Awaitable } from "../types";
 
 export interface ResolvablePluginInformation {
@@ -8,16 +9,13 @@ export interface ResolvablePluginInformation {
     version: string;
 }
 
-export abstract class TyphonPlugin implements Events {
+export abstract class TyphonPlugin extends EventEmitter<TyphonEvents> {
 
     constructor(private pluginInfo: ResolvablePluginInformation) {
+        super();
     } 
 
     abstract load(): Awaitable<void>;
-
-    onEvent<T extends keyof TyphonEvents>(eventName: T, ...args: TyphonEvents[T]) {
-        return args;
-    }
 
     registerFreshCommand(command: CommandBase) {
         CommandRegistry.getInstance().registerCommand(command);

@@ -3,7 +3,7 @@ import { JavaScriptConfiguration } from "../config/JavaScriptConfiguration";
 import Collection from "../utils/Collection";
 import { TyphonPlugin } from "./TyphonPlugin";
 import { ArrayUtils } from "../utils/ArrayUtils";
-import { CancellableEvent, TyphonEvents } from "../events/Events";
+import { TyphonEvents } from "../events/Events";
 import { Newable } from "../types";
 
 export class TyphonPluginManager {
@@ -68,7 +68,7 @@ export class TyphonPluginManager {
      * @param args Arguments of the event
      * @returns Cancelled or not
      */
-    processEvent<T extends keyof TyphonEvents>(key: T, ...args: TyphonEvents[T]): boolean {
+    processEvent<T extends keyof TyphonEvents>(key: T, ...args: TyphonEvents[T] extends any[] ? TyphonEvents[T] : never): boolean {
         for (const [_, plugin] of this.plugins) {
             return this.processPluginEvent(plugin, key, ...args);
         }
@@ -76,12 +76,12 @@ export class TyphonPluginManager {
         return false;
     }
 
-    processPluginEvent<T extends keyof TyphonEvents>(plugin: TyphonPlugin, key: T, ...args: TyphonEvents[T]): boolean {
-        const result = plugin.onEvent(key, ...args);
-        const cancelledEvents = ArrayUtils.filter(result as CancellableEvent[], (v) => v.canceled == true);
-        if (ArrayUtils.isNotEmpty(cancelledEvents)) {
-            return true;
-        }
-        return false;
-    }
+    processPluginEvent<T extends keyof TyphonEvents>(
+        plugin: TyphonPlugin, 
+        key: T, 
+        ...args: TyphonEvents[T] extends any[] ? TyphonEvents[T] : never
+      ): boolean {
+        plugin.emit<T>(key, ...args as any);
+        return true;
+      }
 }

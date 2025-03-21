@@ -3,10 +3,9 @@ import { TyphRunner } from "../../runner/TyphRunner";
 import { TyphonFile } from "../../types";
 import { CommandBase, SectionType } from "../CommandBase";
 import { inspect } from "fs-jetpack"
-import { CancellableEvent } from "../../events/Events";
 import { TyphonPluginManager } from "../../plugin/TyphonPluginManager";
 
-export interface RunEventContext extends CancellableEvent {
+export interface RunEventContext {
 
     performance: boolean;
     file: string;
@@ -36,7 +35,6 @@ export class RunCommand extends CommandBase<SectionType> {
         const runnerContext: RunEventContext = {
             file: file,
             performance: options?.performance ?? false,
-            canceled: false
         }
 
         const canceled = TyphonPluginManager.getInstance().processEvent("run", runnerContext);

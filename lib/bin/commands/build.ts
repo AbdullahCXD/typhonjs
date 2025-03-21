@@ -2,10 +2,9 @@ import { Command } from "commander";
 import { CommandBase, SectionType } from "../CommandBase";
 import { Project } from "../../project";
 import { Packager } from "../../packager";
-import { CancellableEvent } from "../../events/Events";
 import { TyphonPluginManager } from "../../plugin/TyphonPluginManager";
 
-export interface BuildEventContext extends CancellableEvent {
+export interface BuildEventContext {
 
     project: Project;
     packager: Packager;
@@ -33,7 +32,6 @@ export class BuildCommand extends CommandBase<SectionType> {
         const eventData: BuildEventContext = {
             packager: packager,
             project: project,
-            canceled: false
         };
 
         const canceled = TyphonPluginManager.getInstance().processEvent("build", eventData);
