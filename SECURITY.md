@@ -14,4 +14,4 @@ currently being supported with security updates.
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability:
-- For non-critical issues, please use either [Github Issues](https://github.com/abdullahcxd/typhonjs/issues) or our [Discord Server](https://discord.gg/)
+- For non-critical issues, please use either [Github Issues](https://github.com/abdullahcxd/typhonjs/issues) or our [Discord Server](https://discord.gg/aAMV97NYwc)
