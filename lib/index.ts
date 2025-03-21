@@ -12,6 +12,7 @@ export * from "./events";
 export * from "./commands";
 export * from "./config";
 export * from "./caching";
+export * from "./TyphonLogger";
 
 /* Typings Only */
 export * from "./types";
