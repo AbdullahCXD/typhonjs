@@ -1,6 +1,6 @@
 {
   "name": "typhonjs",
-  "version": "1.0.82",
+  "version": "1.0.83",
   "description": "Maven/Gradle inspired build system/project manager for Node.js",
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -42,7 +42,6 @@
     "rimraf": "^6.0.1",
     "semver": "^7.7.1",
     "signale": "^1.4.0",
-    "typhonjs": "^1.0.7",
     "which-pm": "^3.0.1"
   },
   "devDependencies": {
