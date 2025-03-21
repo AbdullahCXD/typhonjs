@@ -10,6 +10,7 @@ import { PackageManager, PackagerOptions, TyphonBuildFile } from "../types";
 import { TyphonLogger } from "../TyphonLogger";
 import { isDirectory } from "../utility";
 import { PackagePath } from "./PackagePath";
+import Messages from "../utils/Messages";
 
 gracefulFs.gracefulify(fs);
 
@@ -39,7 +40,9 @@ export class Packager {
 
     async package(): Promise<void> {
         try {
-            if (this.project.getConfig().getBoolean("buildinfo.plugin", false)) return this.logger.error("Plugin building is restricted! You cannot package/build a plugin project.");
+            if (this.project.getConfig().getBoolean("buildinfo.plugin", false)) return Messages.printUnpackagablePlugin(this.logger);
+
+
 
             // Start the build process
             this.logger.startBuild();

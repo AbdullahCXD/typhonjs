@@ -1,6 +1,7 @@
 import chalk from 'ansi-colors';
 import cliProgress from 'cli-progress';
 import { BorderStyle, TerminalBox } from './utils/Boxen';
+import { TerminalMarkdown } from './utils/TerminalMarkdown';
 
 export enum LogLevel {
   DEBUG = 0,
@@ -207,7 +208,7 @@ export class TyphonLogger {
         prefix = chalk.dim(figures.bullet);
     }
 
-    return `${indent}${prefix} ${message}`;
+    return `${indent}${prefix} ${TerminalMarkdown.parse(message)}`;
   }
 
   private getTimestamp(): string {
