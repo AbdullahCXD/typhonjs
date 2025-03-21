@@ -2,12 +2,11 @@ module.exports = {
   buildinfo: {
     name: "test",
     version: "0.0.1",
-    packageManager: "npm"
+    packageManager: "npm",
+    plugin: true
   },
   build: {
-    main: "index.js"
+    main: "src/plugin.js"
   },
-  dependencies: {
-    consola: "^3.4.2"
-  }
+  dependencies: {}
 };

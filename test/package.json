@@ -10,9 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "consola": "^3.4.2"
-  },
-  "workspaces": [
-    "resources"
-  ]
+    "typhonjs": "^1.0.7"
+  }
 }
