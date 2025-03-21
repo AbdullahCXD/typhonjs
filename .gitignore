@@ -3,4 +3,5 @@ target
 dist
 typings
 testProject
+pnpm-lock.yaml
 .vscode
