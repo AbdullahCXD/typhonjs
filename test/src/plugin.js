@@ -8,6 +8,11 @@ class PluginProduct extends TyphonPlugin {
         console.log("Loaded!");
     }
 
+    onEvent(key, ...args) {
+        if (key === "test") console.log("Recieved test event")
+        return args;
+    }
+
 }
 
 module.exports = PluginProduct;

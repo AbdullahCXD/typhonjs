@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "typhonjs": "^1.0.7"
+    "typhonjs": "^1.0.81"
   }
 }
