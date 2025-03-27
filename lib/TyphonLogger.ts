@@ -1,5 +1,8 @@
 import chalk from 'ansi-colors';
 import cliProgress from 'cli-progress';
+import ora from 'ora';
+import { Listr } from 'listr2';
+import highlight from 'cli-highlight';
 import { BorderStyle, TerminalBox } from './utils/Boxen';
 import { TerminalMarkdown } from './utils/TerminalMarkdown';
 
@@ -47,6 +50,13 @@ export const figures = {
  */
 export class TyphonLogger {
   private static instance: TyphonLogger;
+  private readonly spinner = ora();
+  private readonly multibar = new cliProgress.MultiBar({
+    format: `${chalk.cyan(figures.pointer)} {bar} ${chalk.cyan('{percentage}%')} | {value}/{total} | {status}`,
+    barCompleteChar: '━',
+    barIncompleteChar: '─',
+    hideCursor: true
+  }, cliProgress.Presets.shades_classic);
   private name: string;
   private level: LogLevel;
   private startTime: number;
@@ -107,8 +117,9 @@ export class TyphonLogger {
     console.log('');
   }
 
-  startSection(title: string): void {
-    this.info(`${chalk.cyan(figures.play)} ${chalk.bold(title)}`);
+  startSection(title: string, options: { icon?: boolean; style?: string } = {}): void {
+    const icon = options.icon ? '📦 ' : '';
+    console.log('\n' + chalk.bold.cyan(`${icon}${figures.play} ${title}`));
     this.indentLevel++;
   }
 
@@ -149,7 +160,20 @@ export class TyphonLogger {
   }
 
   startBuild(): void {
-    this.header(`${this.name} BUILD`);
+    console.clear(); // Clear console for clean output
+    const title = chalk.bold.cyan(` ${this.name} BUILD `);
+    const subtitle = chalk.dim(`v${process.env.npm_package_version || '1.0.0'}`);
+    
+    console.log('\n' + TerminalBox.create(
+      `${title}\n${subtitle}`,
+      {
+        padding: 1,
+        margin: { top: 1, bottom: 1, left: 1, right: 1 },
+        borderStyle: BorderStyle.DOUBLE,
+        borderColor: 'cyan',
+        float: 'center'
+      }
+    ));
     this.startTime = Date.now();
   }
 
@@ -182,6 +206,50 @@ export class TyphonLogger {
         borderColor: 'red'
       }
     ));
+  }
+
+  async startTasks(tasks: Array<{ title: string; task: () => Promise<void> }>): Promise<void> {
+    const listr = new Listr(tasks.map(t => ({
+      title: t.title,
+      task: t.task
+    })), {
+      concurrent: false,
+      exitOnError: true,
+      renderer: 'default'
+    });
+
+    await listr.run();
+  }
+
+  startProgress(id: string, options: { 
+    total: number;
+    title: string;
+    style?: 'bar' | 'spinner';
+  }): void {
+    if (options.style === 'spinner') {
+      this.spinner.start(options.title);
+    } else {
+      const bar = this.multibar.create(options.total, 0, { status: chalk.dim('Starting...') });
+      this.progressBars.set(id, bar);
+    }
+  }
+
+  updateProgress(id: string, value: number, status?: string): void {
+    const bar = this.progressBars.get(id);
+    if (bar) {
+      bar.update(value, { status: status ? chalk.dim(status) : undefined });
+    }
+  }
+
+  completeProgress(id: string, message?: string): void {
+    const bar = this.progressBars.get(id);
+    if (bar) {
+      bar.stop();
+      this.progressBars.delete(id);
+      if (message) {
+        this.success(message);
+      }
+    }
   }
 
   private format(message: string, level: string): string {
@@ -416,7 +484,7 @@ export class TyphonLogger {
   keyValue(data: Record<string, any>, title?: string): void {
     if (this.level <= LogLevel.INFO) {
       if (title) {
-        console.log(this.format(`${chalk.bold(title)}:`, 'info'));
+        console.log('\n' + chalk.bold.cyan(`${figures.pointer} ${title}`));
       }
 
       const indent = '  '.repeat(this.indentLevel + 1);

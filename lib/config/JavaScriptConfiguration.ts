@@ -22,9 +22,6 @@ export class JavaScriptConfiguration {
         
     if (autoload) {
         this.config = this.loadConfig();
-        // Add debug logging
-        console.debug('Loaded config from:', this.configPath);
-        console.debug('Config contents:', this.config);
     }
   }
 

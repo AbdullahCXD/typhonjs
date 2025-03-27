@@ -31,6 +31,16 @@ export interface TyphonConfig {
 
 }
 
+export interface TyphonBuildFile {
+
+    name: string;
+    version: string;
+    main: string;
+    pm: PackageManager;
+    deps: Record<string, string>
+
+}
+
 export type AskInformation = {
     name: string;
     version: string;
