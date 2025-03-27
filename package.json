@@ -1,6 +1,6 @@
 {
   "name": "typhonjs",
-  "version": "1.0.92",
+  "version": "1.0.93",
   "description": "Maven/Gradle inspired build system/project manager for Node.js",
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -16,10 +16,14 @@
   "keywords": [],
   "author": "AbdullahCXD",
   "maintainers": [
-    "AbdullahCXD",
-    "abdcxdonline"
+    {
+      "name": "AbdullahCXD"
+    },
+    {
+      "name": "abdcxdonline"
+    }
   ],
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.6.4",
   "dependencies": {
     "adm-zip": "^0.5.16",
@@ -65,5 +69,17 @@
     "overrides": {
       "test": "link:../../../.local/share/pnpm/global/5/node_modules/test"
     }
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullahcxd/typhonjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abdullahcxd/typhonjs/issues"
+  },
+  "homepage": "https://docs.abdullahcxd.is-a.dev"
 }
