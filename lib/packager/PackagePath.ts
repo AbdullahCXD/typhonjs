@@ -1,13 +1,25 @@
 import path from "path";
 
 export class PackagePath {
-
     static replace(main: string) {
-        const p = path.parse(main);
-        // Only replace dots with path separators in the directory part
-        const dirPath = p.dir.replaceAll(".", path.sep);
-        // Combine the transformed directory path with the original filename including extension
-        return path.join(dirPath, p.base);
-    }
+        // Handle empty or invalid input
+        if (!main) return main;
 
+        const p = path.parse(main);
+        
+        // Split the full path into parts
+        const parts = main.split('.');
+        
+        // If there's only one part or no dots, return original
+        if (parts.length <= 1) return main;
+        
+        // Get the file name with extension (last part)
+        const fileName = parts[parts.length - 1];
+        
+        // Join all parts except the last one with path separator
+        const dirPath = parts.slice(0, -1).join(path.sep);
+        
+        // Combine directory path with filename
+        return path.join(dirPath, fileName);
+    }
 }

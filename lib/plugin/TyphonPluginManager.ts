@@ -34,7 +34,6 @@ export class TyphonPluginManager {
         if (plugins && ArrayUtils.isNotEmpty(plugins)) {
             for (const plugin of plugins) {
                 let p: TyphonPlugin;
-                console.log(plugin);
                 if ('prototype' in plugin) {
                     const unconstructedPlugin: Newable<TyphonPlugin> = plugin as unknown as Newable<TyphonPlugin>
                     p = new unconstructedPlugin();

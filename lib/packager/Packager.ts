@@ -11,6 +11,7 @@ import { TyphonLogger } from "../TyphonLogger";
 import { isDirectory } from "../utility";
 import { PackagePath } from "./PackagePath";
 import Messages from "../utils/Messages";
+import { JavaScriptConfiguration } from "../config";
 
 gracefulFs.gracefulify(fs);
 
@@ -21,6 +22,7 @@ export class Packager {
     private excludeTests: boolean;
     private ignorePatterns: Set<string>;
     private logger: TyphonLogger;
+    private config: JavaScriptConfiguration;
     private stats = {
         totalFiles: 0,
         totalSize: 0,
@@ -31,7 +33,8 @@ export class Packager {
     
     constructor(private project: Project, options?: PackagerOptions) {
         this.distDir = options?.distDirectory ?? "target";
-        this.packagingName = options?.packagingName ?? `${this.project.name}.typh`;
+        this.config = new JavaScriptConfiguration(path.join(process.cwd(), "typh.config.js"), {}, true);
+        this.packagingName = options?.packagingName ?? `${this.config.get("buildinfo.name", "out")}.typh`;
         this.zip = new AdmZip();
         this.excludeTests = options?.excludeTests ?? true;
         this.ignorePatterns = new Set(options?.ignore ?? []);
@@ -40,101 +43,91 @@ export class Packager {
 
     async package(): Promise<void> {
         try {
-            if (this.project.getConfig().getBoolean("buildinfo.plugin", false)) return Messages.printUnpackagablePlugin(this.logger);
+            if (this.project.getConfig().getBoolean("buildinfo.plugin", false)) {
+                this.logger.warn("Cannot package plugin project");
+                return;
+            }
 
-
-
-            // Start the build process
+            // Start build with project info
             this.logger.startBuild();
-            
-            // Ensure target directory exists
-            await jetpack.dirAsync(this.distDir);
-            const targetFile = path.join(this.distDir, this.packagingName);
-            const projectRoot = this.project.projectPath;
-            
-            // Show project information
-            this.logger.info(`${chalk.bold(this.project.name)} v${chalk.cyan(this.project.version || "0.0.1")}`);
-            
-            // Start packaging section
+            this.logger.keyValue({
+                "Project": chalk.bold(this.packagingName || "Unknown"),
+                "Version": chalk.cyan(this.project.version || "0.0.1"),
+                "Target": chalk.dim(path.join(this.distDir, this.packagingName))
+            }, "Package Information");
+
+            // Prepare package environment
             this.logger.startSection("Preparing package environment");
-            this.logger.info(`Target: ${chalk.cyan(targetFile)}`);
-            this.logger.info(`Root: ${chalk.dim(projectRoot)}`);
-            this.logger.endSection("Preparation complete");
-            
-            // Get files from source directories
+            await jetpack.dirAsync(this.distDir);
+            this.logger.endSection("Environment ready");
+
+            // Scan source directories
             this.logger.startSection("Scanning source directories");
             
-            // JavaScript files
-            const jsDir = path.join(projectRoot, "src/main/javascript");
-            const jsFiles = await this.getFiles(jsDir);
-            this.stats.jsFiles = jsFiles.filter(file => !isDirectory(file)).length;
-            this.logger.info(`Found ${chalk.yellow(this.stats.jsFiles.toString())} JavaScript files`);
+            const [jsFiles, resourceFiles] = await Promise.all([
+                this.getFiles(path.join(this.project.projectPath, "src/main/javascript")),
+                this.getFiles(path.join(this.project.projectPath, "src/main/resources"))
+            ]);
+
+            this.logger.customTable(
+                ["Source Type", "Files", "Status"],
+                [
+                    ["JavaScript", jsFiles.length, chalk.green("✓")],
+                    ["Resources", resourceFiles.length, chalk.green("✓")]
+                ],
+                {
+                    headerColor: "cyan",
+                    align: ["left", "right", "center"]
+                }
+            );
             
-            // Resource files
-            const resourcesDir = path.join(projectRoot, "src/main/resources");
-            const resourceFiles = await this.getFiles(resourcesDir);
-            this.stats.resourceFiles = resourceFiles.filter(file => !isDirectory(file)).length;
-            this.logger.info(`Found ${chalk.yellow(this.stats.resourceFiles.toString())} resource files`);
-            
-            this.logger.endSection("Scanning complete");
-            
-            // Start packaging files
+            this.logger.endSection("Scan complete");
+
+            // Package files
             this.logger.startSection("Packaging files");
             
-            // Package JavaScript files
-            if (this.stats.jsFiles > 0) {
-                this.logger.startTask("js", `Processing JavaScript files`, this.stats.jsFiles);
-                await this.addFilesToZip(jsFiles, jsDir, "js");
+            if (jsFiles.length > 0) {
+                this.logger.startTask("js", "Processing JavaScript files", jsFiles.length);
+                await this.addFilesToZip(jsFiles, "src/main/javascript", "js");
                 this.logger.completeTask("js");
-                this.logger.success(`JavaScript files packaged`);
             }
-            
-            // Package resource files
-            if (this.stats.resourceFiles > 0) {
-                this.logger.startTask("resources", `Processing resource files`, this.stats.resourceFiles);
-                await this.addFilesToZip(resourceFiles, resourcesDir, "resources");
-                this.logger.completeTask("resources");
-                this.logger.success(`Resource files packaged`);
-            }
-            
-            let oldMain = PackagePath.replace(this.project.getConfig().getString("build.main")!);
-            
 
-            const buildBuffer = Buffer.from(JSON.stringify({
+            if (resourceFiles.length > 0) {
+                this.logger.startTask("resources", "Processing resource files", resourceFiles.length);
+                await this.addFilesToZip(resourceFiles, "src/main/resources", "resources");
+                this.logger.completeTask("resources");
+            }
+
+            // Add build info
+            const buildInfo = {
                 name: this.project.name,
                 version: this.project.version,
-                main: oldMain,
-                pm: this.project.getConfig().get("buildinfo.packageManager")! as PackageManager,
-                deps: this.project.getConfig().get("dependencies")! as Record<string, string>
-            }, null, 4));
+                main: PackagePath.replace(this.project.getConfig().getString("build.main")!),
+                pm: this.project.getConfig().get("buildinfo.packageManager"),
+                deps: this.project.getConfig().get("dependencies")
+            };
 
-            this.zip.addFile(TyphonBuildFile, buildBuffer);
-            
+            this.zip.addFile("typhon.build.json", Buffer.from(JSON.stringify(buildInfo, null, 2)));
             this.logger.endSection("Packaging complete");
-            
-            // Write the zip file
+
+            // Create final archive
             this.logger.startSection("Creating archive");
-            this.logger.info(`Writing ${chalk.cyan(this.packagingName)}`);
-            await this.zip.writeZipPromise(targetFile);
+            await this.zip.writeZipPromise(path.join(this.distDir, this.packagingName));
             
-            // Get the size of the final file
-            const fileStats = fs.statSync(targetFile);
-            this.logger.info(`Archive size: ${chalk.yellow(prettyBytes(fileStats.size)!)}`);
+            const stats = fs.statSync(path.join(this.distDir, this.packagingName));
             this.logger.endSection("Archive created");
-            
-            // Display summary
-            this.logger.info(`${chalk.bold("Summary:")}`);
-            this.logger.info(`  JavaScript files: ${chalk.yellow(this.stats.jsFiles.toString())}`);
-            this.logger.info(`  Resource files: ${chalk.yellow(this.stats.resourceFiles.toString())}`);
-            this.logger.info(`  Total files: ${chalk.yellow(this.stats.totalFiles.toString())}`);
-            if (this.stats.skippedFiles > 0) {
-                this.logger.info(`  Skipped files: ${chalk.yellow(this.stats.skippedFiles.toString())}`);
-            }
-            this.logger.info(`  Package size: ${chalk.yellow(prettyBytes(fileStats.size)!)}`);
-            
-            // Finish the build
+
+            // Show summary
+            this.logger.keyValue({
+                "JavaScript files": this.stats.jsFiles,
+                "Resource files": this.stats.resourceFiles,
+                "Total files": this.stats.totalFiles,
+                "Skipped files": this.stats.skippedFiles,
+                "Package size": prettyBytes(stats.size)
+            }, "Build Summary");
+
             this.logger.finishBuild();
-            
+
         } catch (error) {
             this.logger.failBuild(error as Error);
             throw error;

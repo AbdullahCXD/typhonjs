@@ -35,7 +35,6 @@ export class BuildCommand extends CommandBase<SectionType> {
         };
 
         const canceled = TyphonPluginManager.getInstance().processEvent("build", eventData);
-        if (canceled) return;
 
         await packager.package();
 

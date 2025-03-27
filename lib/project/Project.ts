@@ -10,7 +10,6 @@ import { Packager } from "../packager";
 import { AskInformation, PackagerOptions } from "../types";
 import { LogLevel, TyphonLogger } from "../TyphonLogger";
 import { spawnSync } from "child_process";
-import { PluginProduct } from "./products/PluginProduct";
 graceful.gracefulify(fs);
 
 export class Project {
@@ -23,7 +22,7 @@ export class Project {
     private logger: TyphonLogger;
 
     constructor(public projectPath: string) {
-        this.projectConfig = ProjectConfigLoader.load(projectPath);
+        this.projectConfig = ProjectConfigLoader.load(projectPath, false);
         this.setCustomDefinedConfig(this.projectConfig);
         this.productInitializor = new EmptyProduct();
         this.logger = new TyphonLogger(this.name, LogLevel.INFO);

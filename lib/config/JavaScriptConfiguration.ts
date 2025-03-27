@@ -8,15 +8,24 @@ const path = require('path');
 export class JavaScriptConfiguration {
 
   private configPath: string;
-  private config: Record<string, any>;
+  private config: Record<string, any> = {};
 
   /**
    * Creates a new ConfigManager instance
    * @param {string} configPath - Path to the configuration file (default: '.config.js')
    */
-  constructor(configPath = '.config.js', private defaults: Record<string, any> = {}) {
-    this.configPath = path.resolve(process.cwd(), configPath);
-    this.config = this.loadConfig();
+  constructor(configPath = '.config.js', private defaults: Record<string, any> = {}, private autoload: boolean = true) {
+    // Use absolute path if provided, otherwise resolve from cwd
+    this.configPath = path.isAbsolute(configPath) 
+        ? configPath 
+        : path.resolve(process.cwd(), configPath);
+        
+    if (autoload) {
+        this.config = this.loadConfig();
+        // Add debug logging
+        console.debug('Loaded config from:', this.configPath);
+        console.debug('Config contents:', this.config);
+    }
   }
 
   /**
@@ -25,6 +34,11 @@ export class JavaScriptConfiguration {
    */
   loadConfig() {
     try {
+        if (!fs.existsSync(this.configPath)) {
+            console.warn(`Config file not found at ${this.configPath}, using defaults`);
+            return this.defaults;
+        }
+
         // Delete require cache to ensure fresh load
         delete require.cache[require.resolve(this.configPath)];
         

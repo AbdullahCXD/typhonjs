@@ -39,7 +39,6 @@ export class RunCommand extends CommandBase<SectionType> {
 
         const canceled = TyphonPluginManager.getInstance().processEvent("run", runnerContext);
 
-        if (canceled) return;
 
         const old = performance.now();
 
