@@ -22,14 +22,19 @@ export class TyphonPluginManager {
     }
 
     registerPlugins(projectDirectory: string) {
-
-        const config = new JavaScriptConfiguration(path(projectDirectory, "plugins.typh.json"), { plugins: [] });
-        if (!config.exists()) return this;
-        const plugins = config.get("plugins") as TyphonPlugin[];
+        // Add debug logging
+        
+        const configPath = path(projectDirectory, "plugins.typh.js");
+    
+        const config = new JavaScriptConfiguration(configPath, { plugins: [] });
+    
+        
+        const plugins: any[] | undefined = config.get("plugins");
 
         if (plugins && ArrayUtils.isNotEmpty(plugins)) {
             for (const plugin of plugins) {
-                let p: TyphonPlugin
+                let p: TyphonPlugin;
+                console.log(plugin);
                 if ('prototype' in plugin) {
                     const unconstructedPlugin: Newable<TyphonPlugin> = plugin as unknown as Newable<TyphonPlugin>
                     p = new unconstructedPlugin();

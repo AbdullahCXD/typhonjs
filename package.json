@@ -43,6 +43,7 @@
     "rimraf": "^6.0.1",
     "semver": "^7.7.1",
     "signale": "^1.4.0",
+    "test": "link:../../../.local/share/pnpm/global/5/node_modules/test",
     "which-pm": "^3.0.1"
   },
   "devDependencies": {
@@ -60,6 +61,9 @@
     "onlyBuiltDependencies": [
       "es5-ext",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "test": "link:../../../.local/share/pnpm/global/5/node_modules/test"
+    }
   }
 }

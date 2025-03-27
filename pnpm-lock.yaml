@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  test: link:../../../.local/share/pnpm/global/5/node_modules/test
+
 importers:
 
   .:
@@ -71,6 +74,9 @@ importers:
       signale:
         specifier: ^1.4.0
         version: 1.4.0
+      test:
+        specifier: link:../../../.local/share/pnpm/global/5/node_modules/test
+        version: link:../../../.local/share/pnpm/global/5/node_modules/test
       which-pm:
         specifier: ^3.0.1
         version: 3.0.1

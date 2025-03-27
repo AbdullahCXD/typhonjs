@@ -4,3 +4,6 @@ test
 .vscode
 pnpm-workspace.yaml
 .github
+base
+.github
+release.sh

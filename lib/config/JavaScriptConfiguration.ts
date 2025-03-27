@@ -25,18 +25,21 @@ export class JavaScriptConfiguration {
    */
   loadConfig() {
     try {
-      // Clear the module cache to ensure we get fresh config
-      delete require.cache[require.resolve(this.configPath)];
-      
-      // Import the config file
-      const config = require(this.configPath);
-      return typeof config === 'function' ? config() : config;
+        // Delete require cache to ensure fresh load
+        delete require.cache[require.resolve(this.configPath)];
+        
+        // Load config dynamically
+        const loadedConfig = require(this.configPath);
+        
+        this.config = {
+            ...this.defaults,
+            ...loadedConfig
+        };
+        
+        return this.config;
     } catch (error) {
-      // If file doesn't exist or has errors, return empty config
-      if ((error as any).code === 'MODULE_NOT_FOUND') {
+        console.error('Failed to load config:', error);
         return this.defaults;
-      }
-      throw new Error(`Error loading config from ${this.configPath}: ${(error as Error).message}`);
     }
   }
 
